@@ -1,0 +1,4 @@
+rootProject.name = 'explorations'
+
+/**core-java*/
+include 'core-java:language-foundation'
