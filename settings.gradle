@@ -1,4 +1,6 @@
 rootProject.name = 'explorations'
 
 /**core-java*/
-include 'core-java:language-foundation'
+include 'core-java:language-base'
+include 'core-java:collection-api'
+
