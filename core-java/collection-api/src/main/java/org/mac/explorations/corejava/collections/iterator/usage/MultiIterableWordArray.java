@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * 双向迭代
+ * 多方式迭代
  *
  * @auther mac
  * @date 2019-10-11
