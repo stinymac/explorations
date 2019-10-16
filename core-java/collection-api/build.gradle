@@ -9,3 +9,6 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    implementation project(":core-java:language-base")
+}

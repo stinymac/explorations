@@ -12,7 +12,7 @@
  *
  */
 
-package org.mac.explorations.corejava.base.generic.usage;
+package org.mac.explorations.corejava.base;
 
 /**
  * from <<Think in Java>>

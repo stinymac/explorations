@@ -14,6 +14,8 @@
 
 package org.mac.explorations.corejava.base.generic.usage;
 
+import org.mac.explorations.corejava.base.Generator;
+
 /**
  * 一个通用的Generator
  *
