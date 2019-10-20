@@ -15,7 +15,6 @@
 package org.mac.explorations.corejava.collections.filling;
 
 import java.util.AbstractList;
-import java.util.NoSuchElementException;
 
 /**
  *
