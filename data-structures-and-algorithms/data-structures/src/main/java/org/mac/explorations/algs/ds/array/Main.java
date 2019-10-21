@@ -12,7 +12,7 @@
  *
  */
 
-package org.mac.explorations.dsalg.ds.array;
+package org.mac.explorations.algs.ds.array;
 
 /**
  *
