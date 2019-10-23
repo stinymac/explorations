@@ -19,6 +19,41 @@ package org.mac.explorations.algs.ds.array;
  *
  * @see java.util.ArrayList
  *
+ * 简单算法复杂度分析：
+ * 大O描述的是算法的运行时间和输入数据之间的关系
+ *
+ * 添加操作：
+ * addLast(e)     O(1)
+ * addFirst(e)    O(n)
+ * add(index,e)   O(n/2)=O(n)  求的是平均复杂度
+ * 以上三个实际上都是O(n)
+ *
+ * grow O(n)
+ *
+ * 删除操作：
+ * removeLast(e)     O(1)
+ * removeFiest(e)    O(n)
+ * remove(index,e)   O(n/2) = O(n)
+ *
+ * downIfNecessary   O(n)
+ *
+ * 修改操作：
+ * set(index,e)      O(1)
+ *
+ * 查询操作：
+ * get(index)        O(1)
+ * contains(e)       O(n)
+ * indexof(e)        O(n)
+ *
+ * 均摊复杂度：
+ * 动态数组中，由于grow的存在我们将数组的添加操作复杂度视为O(n)，
+ * 但由于addLast的复杂度为O(1)，而且并不是每次addLast操作都会触发grow。
+ * 因此需要对复杂度进行均摊。
+ *
+ * 复杂度震荡：
+ * 在数组容量的边界值，交替添加和删除，扩容和缩容的边界值相同，导致出现不停的grow/down，出现复杂度震荡。
+ * 解决办法：Lazy：添加和删除resize的边界标准不同。
+ *
  * @auther mac
  * @date 2019-10-21
  */
@@ -193,13 +228,18 @@ public class DynamicArray<E> {
     /**
      * 数组空间缩小到合适的容量
      *
+     * elementData.length - size >  (elementData.length >> 1)
+     * size + (size >> 1)
+     * 都是为防止扩容 缩容的复杂度震荡
+     *
      */
     private void downIfNecessary () {
         if ( elementData.length > DEFAULT_CAPACITY
                 && elementData.length - size >  (elementData.length >> 1) ) {
 
-            int rightCapacity = Math.max(size,DEFAULT_CAPACITY);
-            copyElementData(rightCapacity, size);
+            // size + (size >> 1) 防止扩容 缩容的复杂度震荡
+            int rightCapacity = Math.max(size + (size >> 1),DEFAULT_CAPACITY);
+            copyElementData(rightCapacity , size);
         }
     }
 
