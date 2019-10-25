@@ -53,12 +53,33 @@ public class Main {
             System.out.println(circularQueue);
         }*/
 
+        /*
+        Queue<Integer> linkedListQueue = new LinkedListQueue<>();
+
+        for (int i = 0 ; i < 50; i++) {
+            if (i % 3 == 2) {
+                linkedListQueue.dequeue();
+            }
+            linkedListQueue.enqueue(i);
+
+            System.out.println(linkedListQueue);
+        }*/
+
 
         Queue<Integer> arrayQueue = new ArrayQueue<>();
         Queue<Integer> circularQueue = new CircularQueue<>();
+        Queue<Integer> linkedListQueue = new LinkedListQueue<>();
+
         int numberOfOperations = 1000000;
+
+        /**
+         * ArrayQueue cost:128.61859053 s
+         * CircularQueue cost:0.116065703 s  -- 数组扩容
+         * LinkedListQueue cost:0.120641183 s -- 创建新节点(new)
+         */
         System.out.println("ArrayQueue cost:" + simpleQueuePerformance(numberOfOperations,arrayQueue)+" s");
         System.out.println("CircularQueue cost:" + simpleQueuePerformance(numberOfOperations,circularQueue)+" s");
+        System.out.println("LinkedListQueue cost:" + simpleQueuePerformance(numberOfOperations,linkedListQueue)+" s");
     }
 
     private static double simpleQueuePerformance(int numberOfOperations,Queue<Integer> queue) {

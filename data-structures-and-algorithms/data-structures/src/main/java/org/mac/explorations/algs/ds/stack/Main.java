@@ -21,25 +21,39 @@ package org.mac.explorations.algs.ds.stack;
 public class Main {
 
     public static void main(String[] args) {
-        Stack<Integer> stack = new ArrayStack<>();
+        Stack<Integer> arrayStack = new ArrayStack<>();
 
-        stack.push(1);
-        stack.push(2);
-        stack.push(3);
+        arrayStack.push(1);
+        arrayStack.push(2);
+        arrayStack.push(3);
 
-        System.out.println(stack);
+        System.out.println(arrayStack);
 
-        System.out.println(stack.peek());
-        System.out.println(stack.pop());
-        System.out.println(stack.pop());
-        System.out.println(stack.pop());
-        System.out.println(stack.pop());
+        System.out.println(arrayStack.peek());
+        System.out.println(arrayStack.pop());
+        System.out.println(arrayStack.pop());
+        System.out.println(arrayStack.pop());
+        System.out.println(arrayStack.pop());
         //System.out.println(stack.peek());
 
-        System.out.println(stack);
+        System.out.println(arrayStack);
 
         System.out.println(SimpleBracketSyntax.isValid("()[]{}"));
         System.out.println(SimpleBracketSyntax.isValid("([)]"));
         System.out.println(SimpleBracketSyntax.isValid("{[]}"));
+
+        Stack<Integer> linkedListStack = new LinkedListStack<>();
+
+        linkedListStack.push(1);
+        linkedListStack.push(2);
+        linkedListStack.push(3);
+
+        System.out.println(linkedListStack);
+
+        System.out.println(linkedListStack.peek());
+        System.out.println(linkedListStack.pop());
+        System.out.println(linkedListStack.pop());
+        System.out.println(linkedListStack.pop());
+        //System.out.println(linkedListStack.pop());
     }
 }
