@@ -20,7 +20,10 @@ package org.mac.explorations.algs.ds.linkedlist;
  */
 public class Main {
     public static void main(String[] args) {
-        BasicLinkedList<Integer> linkedList = new BasicLinkedList<>();
+
+        //BasicLinkedList<Integer> linkedList = new BasicLinkedList<>();
+        DoublyLinkedList<Integer> linkedList = new DoublyLinkedList<>();
+
         for (int i = 0; i < 5; i++) {
             linkedList.addFirst(i);
             System.out.println(linkedList);
@@ -46,7 +49,20 @@ public class Main {
         System.out.println(linkedList.isEmpty());
 
         System.out.println(linkedList.get(1));
-
         System.out.println(linkedList.contains(10));
+
+        linkedList.removeFirst();
+        linkedList.removeFirst();
+        linkedList.removeFirst();
+        linkedList.removeFirst();
+        linkedList.removeFirst();
+
+        System.out.println(linkedList);
+
+        linkedList.removeFirst();
+
+        System.out.println(linkedList);
+
+        //linkedList.removeFirst();
     }
 }

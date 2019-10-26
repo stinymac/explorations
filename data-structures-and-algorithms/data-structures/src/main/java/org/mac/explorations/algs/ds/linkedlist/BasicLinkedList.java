@@ -136,8 +136,8 @@ public class BasicLinkedList<E> {
     }
 
     private void checkIndex(int index) {
-        // index == size 即向最后添加元素
-        if (index < 0 || index >= size) {
+
+        if (index < 0 || index > size) {
             throw new IndexOutOfBoundsException("size:" + size + " index:" + index);
         }
     }
