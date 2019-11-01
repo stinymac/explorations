@@ -14,10 +14,7 @@
 
 package org.mac.explorations.algs.ds.map;
 
-import org.mac.explorations.algs.ds.linkedlist.BasicLinkedList;
-
 import java.util.NoSuchElementException;
-import java.util.Objects;
 
 /**
  * @auther mac
@@ -29,10 +26,12 @@ public class LinkedListMap<K,V> implements Map<K,V> {
 
         private K key;
         private V value;
+        Entry<K,V> next;
 
-        public Entry(K key, V value) {
+        public Entry(K key, V value,Entry<K,V> next) {
             this.key = key;
             this.value = value;
+            this.next = next;
         }
 
         @Override
@@ -62,35 +61,26 @@ public class LinkedListMap<K,V> implements Map<K,V> {
     }
 
 
-    private static class Node<E> {
-        E item;
-        Node<E> next;
 
-        Node(E element, Node<E> next) {
-            this.item = element;
-            this.next = next;
-        }
-    }
 
     private int size;
 
-    private Node<Map.Entry<K,V>> dummyHead;
+    private Entry<K,V> dummyHead;
 
     public LinkedListMap() {
-        this.dummyHead = new Node<>(null,null);
+        this.dummyHead = new Entry<>(null,null,null);
     }
 
     @Override
     public V put(K key, V value) {
-        Node<Map.Entry<K,V>> p = position(key);
+        Entry<K,V> p = position(key);
         if (p == null) {
-            Map.Entry<K,V> entry = new Entry<>(key,value);
-            Node<Map.Entry<K,V>> newNode = new Node<>(entry,dummyHead.next);
-            dummyHead.next = newNode;
+            Entry<K,V> entry = new Entry<>(key,value,dummyHead.next);
+            dummyHead.next = entry;
             size++;
             return value;
         }
-        V ret = p.item.setValue(value);
+        V ret = p.setValue(value);
         return ret;
     }
 
@@ -100,11 +90,11 @@ public class LinkedListMap<K,V> implements Map<K,V> {
      * @param key
      * @return
      */
-    private  Node<Map.Entry<K,V>> position (K key) {
+    private  Entry<K,V> position (K key) {
 
-        for (Node<Map.Entry<K,V>> p = dummyHead.next; p != null; p = p.next) {
-            if ((key == null && p.item.getKey() == null )
-                    || p.item.getKey().equals(key)){
+        for (Entry<K,V> p = dummyHead.next; p != null; p = p.next) {
+            if ((key == null && p.key == null )
+                    || p.key.equals(key)){
 
                 return p;
             }
@@ -120,31 +110,31 @@ public class LinkedListMap<K,V> implements Map<K,V> {
         /**
          * 定位删除节点的前一个节点
          */
-        Node<Map.Entry<K,V>> prev = dummyHead;
+        Entry<K,V> prev = dummyHead;
         while (prev.next != null) {
-            if ((key == null &&  prev.next.item.getKey() == null )
-                    || prev.next.item.getKey().equals(key)) {
+            if ((key == null &&  prev.next.key == null )
+                    || prev.next.key.equals(key)) {
 
                 break;
             }
             prev = prev.next;
         }
 
-        Node<Map.Entry<K,V>> removedNode = prev.next;
+        Entry<K,V> removedNode = prev.next;
         prev.next = removedNode.next;
         removedNode.next = null;
         size--;
 
-        return removedNode.item.getValue();
+        return removedNode.value;
     }
 
     @Override
     public V get(K key) {
 
-        Node<Map.Entry<K,V>> p = position (key);
+        Entry<K,V> p = position (key);
 
         if (p != null) {
-            return p.item.getValue();
+            return p.value;
         }
 
         throw new NoSuchElementException("Not exist key:"+key);
@@ -153,17 +143,17 @@ public class LinkedListMap<K,V> implements Map<K,V> {
     @Override
     public boolean containsKey(K key) {
 
-        Node<Map.Entry<K,V>> p = position (key);
+        Entry<K,V> p = position (key);
         return p != null ? true : false;
     }
 
     @Override
     public boolean containsValue(V value) {
-        Node<Map.Entry<K,V>> p = dummyHead.next;
+        Entry<K,V> p = dummyHead.next;
 
         while (p != null) {
-            if ((value == null && p.item.getValue() == null )
-                    || p.item.getValue().equals(value)){
+            if ((value == null && p.value == null )
+                    || p.value.equals(value)){
                 return true;
             }
             p = p.next;
@@ -184,8 +174,8 @@ public class LinkedListMap<K,V> implements Map<K,V> {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        for (Node<Map.Entry<K,V>> p = dummyHead.next; p != null; p = p.next) {
-           builder.append("["+p.item.getKey()+":"+p.item.getValue()+"]->");
+        for (Entry<K,V> p = dummyHead.next; p != null; p = p.next) {
+           builder.append("["+p.key+":"+p.value+"]->");
         }
         builder.append("NULL");
         return builder.toString();
