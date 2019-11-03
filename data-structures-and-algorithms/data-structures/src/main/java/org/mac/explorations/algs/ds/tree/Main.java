@@ -39,7 +39,7 @@ public class Main {
         tree.remove(42);
         tree.levelorderTraversal();*/
 
-        BinarySearchTree<Integer> bst = new BinarySearchTree<>();
+      /*  BinarySearchTree<Integer> bst = new BinarySearchTree<>();
         bst.add(41);
         bst.add(22);
         bst.add(58);
@@ -55,6 +55,10 @@ public class Main {
         System.out.println(bst);
         bst.levelorderTraversal();
         System.out.println(bst.floor(45));
-        System.out.println(bst.ceil(45));
+        System.out.println(bst.ceil(45));*/
+
+       SegmentTree<Integer> st = new SegmentTree<>(new Integer[]{1,2,3,4,5,6,7,8},(l,r) -> l+r);
+       System.out.println(st);
+       System.out.println(st.query(1,6));
     }
 }

@@ -14,6 +14,8 @@
 
 package org.mac.explorations.algs.ds.array;
 
+import java.util.Objects;
+
 /**
  * 动态数组
  *
@@ -109,6 +111,15 @@ public class DynamicArray<E> {
         }
         else {
             this.elementData = new Object[initialCapacity];
+        }
+    }
+
+    public DynamicArray(E[] data) {
+        Objects.requireNonNull(data);
+        this.size = data.length;
+        this.elementData = new Object[size];
+        for (int i = 0; i < size; i++) {
+            elementData[i] = data[i];
         }
     }
 
@@ -393,6 +404,21 @@ public class DynamicArray<E> {
         return indexOf(e) >= 0;
     }
 
+    /**
+     * 交换索引i和索引将位置上的元素
+     *
+     * @param i
+     * @param j
+     */
+    public void swap(int i, int j) {
+
+        checkIndexRange (i);
+        checkIndexRange (j);
+
+        Object t = elementData[i];
+        elementData[i] = elementData[j];
+        elementData[j] = t;
+    }
 
     @Override
     public String toString() {

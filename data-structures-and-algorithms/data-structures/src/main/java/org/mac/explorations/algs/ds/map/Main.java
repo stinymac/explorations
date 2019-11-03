@@ -20,7 +20,8 @@ package org.mac.explorations.algs.ds.map;
  */
 public class Main {
     public static void main(String[] args) {
-        Map<String,Integer> wordsCount = new LinkedListMap<>();
+        //Map<String,Integer> wordsCount = new LinkedListMap<>();
+        Map<String,Integer> wordsCount = new BSTMap<>();
         String[] words = "The time has passed, it is not too late Although I can't, my heart is longing for it".split(" ");
 
         for (String word : words) {
@@ -34,5 +35,9 @@ public class Main {
         }
         System.out.println(wordsCount);
         System.out.println(wordsCount.get("it"));
+        wordsCount.remove("I");
+        System.out.println(wordsCount);
+        System.out.println(wordsCount.containsValue(2));
+        System.out.println(wordsCount.containsKey("The"));
     }
 }

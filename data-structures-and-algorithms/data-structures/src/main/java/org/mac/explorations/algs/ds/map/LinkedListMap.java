@@ -17,6 +17,8 @@ package org.mac.explorations.algs.ds.map;
 import java.util.NoSuchElementException;
 
 /**
+ * 链表实现的Map
+ *
  * @auther mac
  * @date 2019-11-01
  */
