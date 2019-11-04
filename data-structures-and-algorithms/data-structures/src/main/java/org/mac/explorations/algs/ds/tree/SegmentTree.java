@@ -67,7 +67,7 @@ public class SegmentTree<E> {
             this.data[i] = data[i];
         }
 
-        this.tree = new Object[data.length<<2];
+        this.tree = new Object[data.length<<2];// 4n
         this.segmenter = segmenter;
         buildSegmentTree(0,0,data.length - 1);
     }
@@ -152,7 +152,7 @@ public class SegmentTree<E> {
      * @param eor
      */
     private void checkRange(int sor, int eor) {
-        if (!(0 < sor && sor < eor && eor < data.length - 1)) {
+        if (!(-1 < sor && sor < eor && eor < data.length)) {
             throw new IllegalArgumentException("range is error");
         }
     }
@@ -166,6 +166,52 @@ public class SegmentTree<E> {
     public E get(int index) {
         checkIndexRange(index);
         return (E)data[index];
+    }
+
+    /**
+     * 将index位置元素更新为恶
+     *
+     * @param index
+     * @param e
+     */
+    public void set(int index,E e) {
+        checkIndexRange(index);
+        data[index] = e;
+
+        set( 0, 0, data.length - 1 , index,e);
+    }
+
+    /**
+     * 递归寻找要更新的叶子节点
+     * 并更新其关联的父节点分段
+     *
+     * @param treeIndex
+     * @param l
+     * @param r
+     * @param index
+     * @param e
+     */
+    private void set(int treeIndex,int l,int r,int index,E e){
+
+        if (l == r) {
+            tree[treeIndex] = e;
+            return;
+        }
+
+        int mid = l + ( (r - l) >> 1) ;
+
+        int leftChildIndex = leftChild(treeIndex);
+        int rightChildIndex = rightChild(treeIndex);
+
+        if (index <= mid) {
+            set(leftChildIndex, l, mid , index,e);
+        }
+        else {
+            set(rightChildIndex, mid + 1, r , index,e);
+        }
+
+        //递归更新其父节点分段
+        tree[treeIndex] = segmenter.merge((E)tree[leftChildIndex],(E)tree[rightChildIndex]);
     }
 
     private void checkIndexRange(int index) {
