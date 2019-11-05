@@ -61,7 +61,7 @@ public class MaximumHeap<E extends Comparable<E>> {
     public MaximumHeap(E[] data) {
         this.data = new DynamicArray<>(data);
         // 将数组堆化
-        for (int i = parent( this.data.size() -1); i >= 0; i++) {
+        for (int i = parent( this.data.size() -1); i >= 0; i--) {
             siftDown(i);
         }
     }

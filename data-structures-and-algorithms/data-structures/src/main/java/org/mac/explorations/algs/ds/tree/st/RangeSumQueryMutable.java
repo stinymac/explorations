@@ -12,7 +12,7 @@
  *
  */
 
-package org.mac.explorations.algs.ds.tree;
+package org.mac.explorations.algs.ds.tree.st;
 
 /**
  * 区域和检索 - 数组可修改
@@ -31,7 +31,7 @@ public class RangeSumQueryMutable {
 
     public RangeSumQueryMutable(Integer[] data) {
 
-        this.segmentTree = new SegmentTree<>(data,(i,j) -> i+j);
+        this.segmentTree = new SegmentTree<>(data,(i, j) -> i+j);
     }
 
     public void update(int i, int val) {

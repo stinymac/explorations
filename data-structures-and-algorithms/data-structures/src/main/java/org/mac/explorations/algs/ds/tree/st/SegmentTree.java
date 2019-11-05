@@ -12,7 +12,7 @@
  *
  */
 
-package org.mac.explorations.algs.ds.tree;
+package org.mac.explorations.algs.ds.tree.st;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -51,7 +51,7 @@ import java.util.Objects;
 public class SegmentTree<E> {
 
     public interface Segmenter<E>{
-        E merge (E le,E re);
+        E merge(E le, E re);
     }
 
     private Object[] data;

@@ -14,6 +14,8 @@
 
 package org.mac.explorations.algs.ds.tree;
 
+import org.mac.explorations.algs.ds.tree.trie.Trie;
+
 /**
  * @auther mac
  * @date 2019-10-31
@@ -79,6 +81,10 @@ public class Main {
        trie2.add("cat",true);
        trie2.add("dog",true);
        trie2.add("panda",true);
-       System.out.println(trie1);
+       System.out.println(trie2);
+
+       System.out.println(trie1.contains("cat"));
+       System.out.println(trie2.contains("cat"));
+       System.out.println(trie1.isPrefix("ca"));
     }
 }

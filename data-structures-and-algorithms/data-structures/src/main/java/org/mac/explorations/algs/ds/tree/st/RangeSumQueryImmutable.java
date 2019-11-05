@@ -12,7 +12,7 @@
  *
  */
 
-package org.mac.explorations.algs.ds.tree;
+package org.mac.explorations.algs.ds.tree.st;
 
 import java.util.Objects;
 
@@ -30,7 +30,7 @@ public class RangeSumQueryImmutable {
         private final SegmentTree<Integer> segmentTree;
 
         public WithSegmentTree(Integer[] data) {
-            this.segmentTree = new SegmentTree<>(data,(i,j) -> i+j);
+            this.segmentTree = new SegmentTree<>(data,(i, j) -> i+j);
         }
 
         public int sumRange(int i,int j) {

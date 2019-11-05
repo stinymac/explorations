@@ -12,9 +12,10 @@
  *
  */
 
-package org.mac.explorations.algs.ds.tree;
+package org.mac.explorations.algs.ds.tree.trie;
 
 import java.util.HashMap;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Map;
 
@@ -45,6 +46,7 @@ public class Trie {
     private int size;
 
     public Trie() {
+        root = new Node();
     }
 
     /**
@@ -64,13 +66,12 @@ public class Trie {
     public void add (String word,boolean useRecursion) {
 
         Objects.requireNonNull(word);
-        int length = word.length();
 
         if (useRecursion) {
-            addRecursively(root,word,0,length);
+            addRecursively(root,word,0);
         }
         else {
-            addIteratively(word, length);
+            addIteratively(word);
         }
     }
 
@@ -78,11 +79,11 @@ public class Trie {
      * 非递归添加
      *
      * @param word
-     * @param length
      */
-    private void addIteratively(String word, int length) {
+    private void addIteratively(String word) {
 
-        Node p = root = (root == null ? new Node() : root);
+        Node p = root;
+        int length = word.length();
 
         for (int i = 0; i < length ; i++) {
 
@@ -97,7 +98,7 @@ public class Trie {
 
            p = next;
         }
-        PostAddProcessing(p);
+        postAddProcessing(p);
     }
 
     /**
@@ -105,7 +106,7 @@ public class Trie {
      *
      * @param p
      */
-    private void PostAddProcessing(Node p) {
+    private void postAddProcessing(Node p) {
         if (!p.isWordEnding) { // 单词最后一个字符
             p.isWordEnding = true;
             size++;
@@ -117,42 +118,69 @@ public class Trie {
      *
      * @param word
      */
-    private void addRecursively(Node root,String word,int charAtIndex,int length) {
+    private void addRecursively(Node root,String word,int charAtIndex) {
 
-        if (charAtIndex == length) {
+        if (charAtIndex == word.length()) {
+            postAddProcessing(root);
             return;
         }
 
         char c = word.charAt(charAtIndex);
-        Node p = add(root, c);
-
-        if (charAtIndex == 0)  {
-            this.root = p;
+        if (root.next.get(c) == null) {
+            root.next.put(c,new Node());
         }
+
         int nextIndex = charAtIndex + 1;
-        addRecursively(p.next.get(c),word,nextIndex,length);
-
-        if (charAtIndex == length - 1) {
-            PostAddProcessing(p);
-            return;
-        }
+        addRecursively(root.next.get(c),word,nextIndex);
     }
 
-    private Node add(Node root, char c) {
+    /**
+     * 单词查询
+     *
+     * @param word
+     * @return
+     */
+    public boolean contains(String word) {
 
-        if (root == null) {
-            Node newNode = new Node();
-            newNode.next.put(c,new Node());
-            return newNode;
+        Node p = root;
+
+        int length = word.length();
+        for (int i = 0; i < length ; i++) {
+
+            char c = word.charAt(i);
+            Node next = p.next.get(c);
+
+            if (next == null) {
+               return false;
+            }
+
+            p = next;
         }
 
-        Node next = root.next.get(c);
+        return p.isWordEnding;
+    }
 
-        if (next == null) {
-            root.next.put(c, new Node());
+    /**
+     * 单词是否是一个前缀
+     *
+     * @param word
+     * @return
+     */
+    public boolean isPrefix(String word) {
+
+        Node p = root;
+
+        int length = word.length();
+        for (int i = 0; i < length ; i++) {
+
+            char c = word.charAt(i);
+            if (p.next.get(c) == null) {
+                return false;
+            }
+            p = p.next.get(c);
         }
 
-        return root;
+        return true;
     }
 
     public boolean isEmpty() {
