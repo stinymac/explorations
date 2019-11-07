@@ -22,7 +22,7 @@ public class Main {
     public static void main(String[] args) {
         //Map<String,Integer> wordsCount = new LinkedListMap<>();
         Map<String,Integer> wordsCount = new BSTMap<>();
-        String[] words = "The time has passed, it is not too late Although I can't, my heart is longing for it".split(" ");
+        String[] words = "The The The time has passed, it is not too late Although I can't, my heart is longing for it".split(" ");
 
         for (String word : words) {
             if (wordsCount.containsKey(word)) {
