@@ -62,7 +62,7 @@ public class MaximumHeap<E extends Comparable<E>> {
         this.data = new DynamicArray<>(data);
         // 将数组堆化
         for (int i = parent( this.data.size() -1); i >= 0; i--) {
-            siftDown(i);
+            shiftDown(i);
         }
     }
 
@@ -76,7 +76,7 @@ public class MaximumHeap<E extends Comparable<E>> {
 
     public void add (E e) {
         data.add(e);
-        siftUp(data.size() - 1);
+        shiftUp(data.size() - 1);
     }
 
     /**
@@ -85,7 +85,7 @@ public class MaximumHeap<E extends Comparable<E>> {
      *
      * @param index
      */
-    private void siftUp(int index) {
+    private void shiftUp(int index) {
 
         while (index > 0
                 && data.get(parent(index)).compareTo(data.get(index)) < 0) {
@@ -123,7 +123,7 @@ public class MaximumHeap<E extends Comparable<E>> {
         data.swap(0,size()-1);
         data.removeLast();
 
-        siftDown(0);
+        shiftDown(0);
 
         return topElement;
     }
@@ -133,7 +133,7 @@ public class MaximumHeap<E extends Comparable<E>> {
      *
      * @param index
      */
-    private void siftDown(int index) {
+    private void shiftDown(int index) {
 
         /**
          * 给定索引的左孩子没有越界则需继续检查调整
@@ -216,7 +216,7 @@ public class MaximumHeap<E extends Comparable<E>> {
     public E replace(E e) {
         E ret = max();
         data.set(0,e);
-        siftDown(0);
+        shiftDown(0);
         return ret;
     }
 

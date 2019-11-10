@@ -4,5 +4,8 @@ rootProject.name = 'explorations'
 include 'core-java:language-base'
 include 'core-java:collection-api'
 include 'data-structures-and-algorithms:data-structures'
+include 'data-structures-and-algorithms:algorithms'
 //findProject(':data-structures-and-algorithms:data-structures')?.name = 'data-structures'
+
+//findProject(':data-structures-and-algorithms:algorithms')?.name = 'algorithms'
 
