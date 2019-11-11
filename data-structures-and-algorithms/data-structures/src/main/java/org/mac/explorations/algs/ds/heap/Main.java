@@ -25,21 +25,26 @@ import java.util.Random;
 public class Main {
 
     public static void main(String[] args) {
-        int n = 1000000;
-        MaximumHeap<Integer> heap = new MaximumHeap<>(n);
-        //int[] a = {52,64,41,30,28,16,22,13,19,17,15};
+        int n = 10;
+        //MaximumHeap<Integer> heap = new MaximumHeap<>(n);
+        IndexMaximumHeap<Integer> heap = new IndexMaximumHeap<>(n);
         Random random = new Random(System.currentTimeMillis());
         for (int i = 0; i < n; i++) {
-            heap.add(random.nextInt(Integer.MAX_VALUE));//
+            heap.add(random.nextInt(1<<n));//
         }
-
-        System.out.println("size:"+heap.size());
-
-        List<Integer> sortList = new ArrayList<>(n);
+        heap = new IndexMaximumHeap<>(new Integer[]{777,915,339,270,731,140,371,800,427,908});
+        System.out.println(heap);
+        System.out.println(heap.set(5,1000));
+        System.out.println(heap);
+        heap.take();
+        heap.take();
+        System.out.println(heap);
+        heap.add(781);
+        System.out.println(heap);
+        /*List<Integer> sortList = new ArrayList<>(n);
         for (int i = 0; i < n; i++) {
             sortList.add(heap.take());
         }
-
 
         for (int i = 1; i < n; i++) {
             if (sortList.get(i-1) - sortList.get(i) < 0) {
@@ -47,5 +52,7 @@ public class Main {
             }
         }
         System.out.println("success");
+        System.out.println(heap);*/
+        //System.out.println(heap.set(5,100));
     }
 }

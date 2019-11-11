@@ -423,14 +423,15 @@ public class DynamicArray<E> {
     @Override
     public String toString() {
         StringBuilder ret = new StringBuilder();
-        ret.append("{ capacity:"+this.elementData.length + " size:" + size + " element:[");
+        //ret.append("{ capacity:"+this.elementData.length + " size:" + size + " element:[");
+        ret.append("[");
         for (int i = 0; i < size; i++) {
-            ret.append(elementData[i].toString());
+            ret.append(elementData[i] == null? "null":elementData[i].toString());
             if (i < size - 1) {
                 ret.append(",");
             }
         }
-        ret.append("] }");
+        ret.append("]");
         return ret.toString();
     }
 }
