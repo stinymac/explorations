@@ -1,0 +1,18 @@
+group 'org.mac'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    maven {
+        url 'http://uk.maven.org/maven2/'
+    }
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'redis.clients', name: 'jedis', version: '3.2.0'
+}

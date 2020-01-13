@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.mac.explorations.framework.mybatis.EmployeeDepartmentMapper">
+
+	<!--
+		联合查询：级联属性封装结果集
+	-->
+	<!--<resultMap id="employeeMap" type="org.mac.explorations.framework.mybatis.Employee">
+		<id column="id" property="id"/>
+		<result column="emp_name" property="name"/>
+		<result column="age" property="age"/>
+		<result column="gender" property="gender"/>
+		<result column="email" property="email"/>
+		<result column="dept_id" property="department.id"/>
+		<result column="dept_name" property="department.name"/>
+	</resultMap>-->
+
+	<!--
+        使用association定义关联的单个对象的封装规则；
+    -->
+	<resultMap id="employeeMap" type="org.mac.explorations.framework.mybatis.Employee">
+		<id column="id" property="id"/>
+		<result column="emp_name" property="name"/>
+		<result column="age" property="age"/>
+		<result column="gender" property="gender"/>
+		<result column="email" property="email"/>
+		<association property="department" javaType="org.mac.explorations.framework.mybatis.Department">
+			<id column="dept_id" property="id"/>
+			<result column="dept_name" property="name"/>
+		</association>
+	</resultMap>
+
+	<select id="getEmployeeById" resultMap="employeeMap">
+		SELECT
+			e.id id,
+			e.name emp_name,
+			e.age age,
+			e.gender gender,
+			e.email email,
+			d.id dept_id,
+			d.name dept_name
+        FROM
+			employee e
+			LEFT JOIN department d ON e.dept_id = d.id
+        WHERE
+	        e.id = #{id}
+	</select>
+
+	<!--
+	    使用association进行分步查询：
+		1、先按照员工id查询员工信息
+		2、根据查询员工信息中的dept_id值去部门表查出部门信息
+		3、部门设置到员工中；
+
+		分步查询可以使用延迟加(懒加载/按需加载)
+		<setting name="lazyLoadingEnabled" value="true"/>
+		<setting name="aggressiveLazyLoading" value="false"/>
+	-->
+    <resultMap id="employeeMapWithStep" type="org.mac.explorations.framework.mybatis.Employee">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="age" property="age"/>
+		<result column="gender" property="gender"/>
+		<result column="email" property="email"/>
+		<!--
+		    association定义关联对象的封装规则
+	 		select:表明当前属性是调用select指定的方法查出的结果
+	 		column:指定将哪一列的值传给这个方法
+
+	 		流程：使用select指定的方法（传入column指定的这列参数的值）查出对象，并封装给property指定的属性
+	 	 -->
+		<association property="department"
+					 select="org.mac.explorations.framework.mybatis.DepartmentMapper.getDepartmentById"
+					 column="dept_id">
+		</association>
+	</resultMap>
+	<select id="getEmployeeByIdWithStep" resultMap="employeeMapWithStep">
+		SELECT id,name,age,gender,email,dept_id FROM employee WHERE id = #{id}
+	</select>
+
+
+	<!--
+	    <discriminator javaType=""></discriminator>
+		鉴别器：mybatis可以使用discriminator判断某列的值，然后根据某列的值改变封装行为封装Employee
+
+		例如:
+			如果查出的是女生：就把部门信息查询出来，否则不查询；
+			如果是男生，把last_name这一列的值赋值给email;
+	 -->
+	<resultMap id="discriminatorMap" type="org.mac.explorations.framework.mybatis.Employee" >
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="age" property="age"/>
+		<result column="gender" property="gender"/>
+		<result column="email" property="email"/>
+		<!--
+            column：指定判定的列名
+            javaType：列值对应的java类型
+        -->
+		<discriminator javaType="string" column="gender">
+			<!--女生  resultType:指定封装的结果类型；不能缺少。/resultMap-->
+			<case value="0" resultType="org.mac.explorations.framework.mybatis.Employee">
+				<association property="department"
+							 select="org.mac.explorations.framework.mybatis.DepartmentMapper.getDepartmentById"
+							 column="dept_id">
+				</association>
+			</case>
+			<!--男生 ;如果是男生，把last_name这一列的值赋值给email; -->
+			<case value="1" resultType="org.mac.explorations.framework.mybatis.Employee">
+				<id column="id" property="id"/>
+				<result column="name" property="name"/>
+				<result column="age" property="age"/>
+				<result column="gender" property="gender"/>
+				<result column="name" property="email"/>
+			</case>
+		</discriminator>
+	</resultMap>
+	<select id="getEmployeeByIdWithDiscriminator" resultMap="discriminatorMap">
+		SELECT id,name,age,gender,email,dept_id FROM employee WHERE id = #{id}
+	</select>
+</mapper>

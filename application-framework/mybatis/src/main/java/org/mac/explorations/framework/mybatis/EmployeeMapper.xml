@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+namespace:名称空间;指定为接口的全类名
+-->
+<mapper namespace="org.mac.explorations.framework.mybatis.EmployeeMapper">
+
+	<!--
+    eviction:缓存的回收策略：
+        LRU  – 最近最少使用的：移除最长时间不被使用的对象。
+        FIFO – 先进先出：按对象进入缓存的顺序来移除它们。
+        SOFT – 软引用：移除基于垃圾回收器状态和软引用规则的对象。
+        WEAK – 弱引用：更积极地移除基于垃圾收集器状态和弱引用规则的对象。
+        默认的是 LRU。
+    flushInterval：缓存刷新间隔
+        缓存多长时间清空一次，默认不清空，设置一个毫秒值
+    readOnly:是否只读：
+        true：只读；mybatis认为所有从缓存中获取数据的操作都是只读操作，不会修改数据。
+              mybatis为了加快获取速度，直接就会将数据在缓存中的引用交给用户。不安全，速度快
+        false：非只读：mybatis认为获取的数据可能会被修改。
+              mybatis会利用序列化&反序列的技术克隆一份新的数据。安全，速度慢
+
+    size：缓存存放多少元素；
+    type：指定自定义(实现Cache接口即可)缓存的全类名；
+    -->
+
+	<!--<cache eviction="FIFO" flushInterval="60000" size="512" readOnly="true"/>-->
+
+	<!--
+    id：唯一标识
+    resultType：返回值类型
+    #{id}：从传递过来的参数中取出id值
+    -->
+	<select id="getEmployeeById" resultType="org.mac.explorations.framework.mybatis.Employee">
+		SELECT id,name,age,gender,email,status FROM employee WHERE id = #{id}
+	</select>
+
+	<!--
+	public Long addEmployee(Employee employee);
+
+	parameterType：参数类型，可以省略，
+	 获取自增主键的值：
+		mysql支持自增主键，自增主键值的获取，mybatis也是利用statement.getGeneratedKeys()；
+		useGeneratedKeys="true"；使用自增主键获取主键值策略
+		keyProperty；指定对应的主键属性，也就是mybatis获取到主键值以后，将这个值封装给JavaBean的属性
+
+     获取非自增主键的值：
+        Oracle不支持自增；Oracle使用序列来模拟自增；每次插入的数据的主键是从序列中拿到的值；
+
+		keyProperty:查出的主键值封装给javaBean的哪个属性
+		order="BEFORE":当前sql在插入sql之前运行
+			   AFTER：当前sql在插入sql之后运行
+		resultType:查出的数据的返回值类型
+
+		BEFORE运行顺序：
+			先运行selectKey查询id的sql；查出id值封装给JavaBean的id属性
+			在运行插入的sql；就可以取出id属性对应的值
+		AFTER运行顺序：
+			先运行插入的sql（从序列中取出新值作为id）；
+			再运行selectKey查询id的sql；
+
+        <insert id="addEmployee" databaseId="oracle">
+			<selectKey keyProperty="id" order="BEFORE" resultType="Integer">
+			    // BEFORE:
+				select EMPLOYEES_SEQ.nextval from dual
+				// AFTER:
+				//select EMPLOYEES_SEQ.currval from dual
+			</selectKey>
+
+			//插入时的主键是从序列中拿到的
+			// BEFORE:
+			insert into employees(EMPLOYEE_ID,LAST_NAME,EMAIL)
+			values(#{id},#{lastName},#{email})
+			//AFTER：
+			//insert into employees(EMPLOYEE_ID,LAST_NAME,EMAIL)
+			//values(employees_seq.nextval,#{lastName},#{email})
+		</insert>
+	-->
+	<insert id="addEmployee" parameterType="org.mac.explorations.framework.mybatis.Employee"
+			useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO employee ( `name`, age, gender, email,status)
+        VALUES
+	        (#{name},#{age},#{gender},#{email},#{status})
+	</insert>
+
+	<!-- public void updateEmployee(Employee employee);  -->
+	<update id="updateEmployee">
+		UPDATE employee
+        SET `name` = #{name},age = #{age},email=#{email},gender=#{gender}
+        WHERE
+	    id = #{id}
+	</update>
+
+	<!-- public void deleteEmployeeById(Integer id); -->
+	<delete id="deleteEmployeeById">
+		DELETE
+		FROM
+			employee
+		WHERE
+			id = #{id}
+	</delete>
+
+	<!--多个参数-->
+	<select id="getEmployeeByIdAndName" resultType="org.mac.explorations.framework.mybatis.Employee">
+		<!--多个参数若不做处理mybatis会将其放入map 其key为param1...paramN/0..n-->
+		<!--SELECT id,name,age,gender,email FROM employee WHERE id = #{param1} AND `name` = #{param2}-->
+		<!--或者SELECT id,name,age,gender,email FROM employee WHERE id = #{0} AND `name` = #{1}-->
+		SELECT id,name,age,gender,email FROM employee WHERE id = #{id} AND `name` = #{name}
+	</select>
+
+    <!--如果参数是Collection（List、Set）类型或者是数组，mybatis把传入的list或者数组封装在map中。
+			key：Collection（collection）,
+			     List还可以使用这个key(list)
+				 数组(array)
+    -->
+	<select id="getEmployeeByIds" resultType="org.mac.explorations.framework.mybatis.Employee">
+		SELECT id,name,age,gender,email FROM employee WHERE id IN (#{list[0]},#{list[1]})
+	</select>
+
+	<!--返回一个Map-->
+	<select id="getEmployeeMapById" resultType="map">
+		SELECT id,name,age,gender,email FROM employee WHERE id = #{id}
+	</select>
+
+	<!--返回一个Map List 以给定的属性列为key-->
+	<select id="getEmployeesMapByName" resultType="org.mac.explorations.framework.mybatis.Employee">
+		SELECT id,name,age,gender,email FROM employee WHERE `name` LIKE #{name}
+	</select>
+
+	<resultMap id="employeeMap" type="org.mac.explorations.framework.mybatis.Employee">
+		<!--指定主键列的封装规则
+		id定义主键会底层有优化；
+		column：指定哪一列
+		property：指定对应的javaBean属性
+		-->
+		<id column="id" property="id"/>
+		<!-- 定义普通列封装规则 -->
+		<result column="name" property="name"/>
+		<!--不指定的列会自动封装-->
+		<!--<result column="age" property="age"/>-->
+		<result column="email" property="email"/>
+		<result column="gender" property="gender"/>
+	</resultMap>
+	<!--自定义结果集映射-->
+	<select id="getEmployeeByIdWithResultMap" resultMap="employeeMap">
+		SELECT id,name,age,gender,email FROM employee WHERE id = #{id}
+	</select>
+
+	<select id="getEmployeeByDeptId" resultType="org.mac.explorations.framework.mybatis.Employee">
+	    SELECT id,name,age,gender,email FROM employee WHERE dept_id = #{deptId}
+	</select>
+
+    <!--====================================动态SQL====================================-->
+	<select id="getEmployeeByCondition" resultType="org.mac.explorations.framework.mybatis.Employee">
+		SELECT
+			id,
+			name,
+			age,
+			gender,
+			email
+		FROM
+		    employee
+		<!-- where -->
+		<where>
+			<!-- test：判断表达式（OGNL）
+            从参数中取值进行判断
+
+            特殊符号转义字符：
+            -->
+			<if test="id!=null">
+				id=#{id}
+			</if>
+			<if test="name!=null &amp;&amp; name!=&quot;&quot;">
+				and name like #{name}
+			</if>
+			<if test="email!=null and email.trim()!=&quot;&quot;">
+				and email=#{email}
+			</if>
+			<!-- ognl会进行字符串与数字的转换判断  "0"==0 -->
+			<if test="gender==0 or gender==1">
+				and gender=#{gender}
+			</if>
+		</where>
+	</select>
+
+
+	<select id="getEmployeesByConditionWithTrim" resultType="org.mac.explorations.framework.mybatis.Employee">
+		SELECT
+			id,
+			name,
+			age,
+			gender,
+			email
+		FROM
+		    employee
+		<!--
+		后面多出的and或者or where标签不能解决
+        prefix="":前缀：trim标签体中是整个字符串拼串 后的结果。
+                prefix给拼串后的整个字符串加一个前缀
+        prefixOverrides="":
+                前缀覆盖： 去掉整个字符串前面多余的字符
+        suffix="":后缀
+                suffix给拼串后的整个字符串加一个后缀
+        suffixOverrides=""
+                后缀覆盖：去掉整个字符串后面多余的字符
+
+        -->
+		<!-- 自定义字符串的截取规则 -->
+		<trim prefix="where" suffixOverrides="and">
+			<if test="id!=null">
+				id=#{id} and
+			</if>
+			<if test="name!=null &amp;&amp; name!=&quot;&quot;">
+				name like #{name} and
+			</if>
+			<if test="email!=null and email.trim()!=&quot;&quot;">
+				email=#{email} and
+			</if>
+			<!-- ognl会进行字符串与数字的转换判断  "0"==0 -->
+			<if test="gender==0 or gender==1">
+				gender=#{gender}
+			</if>
+		</trim>
+	</select>
+
+	<select id="getEmployeesByConditionWithChoose" resultType="org.mac.explorations.framework.mybatis.Employee">
+
+		SELECT
+			id,
+			name,
+			age,
+			gender,
+			email
+		FROM
+		    employee
+		<where>
+			<!-- 如果带了id就用id查，如果带了name就用name查;只会进入其中一个 -->
+			<choose>
+				<when test="id!=null">
+					id=#{id}
+				</when>
+				<when test="name!=null">
+					name like #{name}
+				</when>
+				<when test="email!=null">
+					email = #{email}
+				</when>
+				<otherwise>
+					gender = 0
+				</otherwise>
+			</choose>
+		</where>
+	</select>
+
+	<update id="updateEmployeeDynamically">
+		<!-- Set标签的使用 -->
+		UPDATE employee
+		<set>
+			<if test="name!=null">
+				name=#{name},
+			</if>
+			<if test="email!=null">
+				email=#{email},
+			</if>
+			<if test="age!=null">
+				age=#{age},
+			</if>
+			<if test="gender!=null">
+				gender=#{gender}
+			</if>
+		</set>
+		WHERE id=#{id}
+	</update>
+
+	<select id="getEmployeeByIdsWithForeach" resultType="org.mac.explorations.framework.mybatis.Employee">
+		SELECT
+			id,
+			name,
+			age,
+			gender,
+			email
+		FROM
+		    employee
+		<!--
+            collection：指定要遍历的集合：
+                list类型的参数会特殊处理封装在map中，map的key就叫list
+            item：将当前遍历出的元素赋值给指定的变量
+            separator:每个元素之间的分隔符
+            open：遍历出所有结果拼接一个开始的字符
+            close:遍历出所有结果拼接一个结束的字符
+            index:索引。遍历list的时候是index就是索引，item就是当前值
+                          遍历map的时候index表示的就是map的key，item就是map的值
+
+            #{变量名}就能取出变量的值也就是当前遍历出的元素
+          -->
+		<foreach collection="ids" item="id" separator=","
+				 open="where id in(" close=")">
+			#{id}
+		</foreach>
+	</select>
+
+	<!--mysql 批量保存-->
+	<insert id="batchInsertEmployees">
+		INSERT INTO employee (
+			name,
+			age,
+			gender,
+			email,
+			dept_id
+		) VALUES
+		<foreach collection="list" item="employee" separator=",">
+			(#{employee.name},#{employee.age},#{employee.gender},#{employee.email},#{employee.department.id})
+		</foreach>
+	</insert>
+
+
+
+	<!--
+	    Oracle数据库批量保存：
+        Oracle不支持values(),(),()
+        Oracle支持的批量方式
+        1、多个insert放在begin - end里面
+            begin
+               insert into employees(employee_id,name,email)
+               values(employees_seq.nextval,'test_001','test_001@atguigu.com');
+               insert into employees(employee_id,name,email)
+               values(employees_seq.nextval,'test_002','test_002@atguigu.com');
+           end;
+        2、利用中间表：
+           insert into employees(employee_id,name,email)
+              select employees_seq.nextval,name,email from(
+                     select 'test_a_01' name,'test_a_e01' email from dual
+                     union
+                     select 'test_a_02' name,'test_a_e02' email from dual
+                     union
+                     select 'test_a_03' name,'test_a_e03' email from dual
+              )
+    -->
+
+	<!--===================================================================================-->
+	<!--
+	   两个内置参数：
+	   不只是方法传递过来的参数可以被用来判断，取值.
+	   mybatis默认还有两个内置参数：
+	   _parameter:代表整个参数
+	 		单个参数：_parameter就是这个参数
+	 		多个参数：参数会被封装为一个map；_parameter就是代表这个map
+
+	   _databaseId:如果配置了databaseIdProvider标签。
+	   _databaseId就是代表当前数据库的别名
+	-->
+	<select id="getEmployeeWithInnerParameter" resultType="org.mac.explorations.framework.mybatis.Employee">
+		<!-- bind：可以将OGNL表达式的值绑定到一个变量中，方便后来引用这个变量的值 -->
+		<bind name="_name" value="'%'+name+'%'"/>
+		<if test="_databaseId=='mysql'">
+			select * from employee
+			<if test="_parameter!=null">
+				where name like #{_name}
+			</if>
+		</if>
+		<if test="_databaseId=='oracle'">
+			select * from employees
+			<if test="_parameter!=null">
+				where name like #{_parameter.name}
+			</if>
+		</if>
+	</select>
+
+	<!--getEmployeeByNameWithPage-->
+	<select id="getEmployeeByNameWithPage" resultType="org.mac.explorations.framework.mybatis.Employee">
+
+	    SELECT
+			id,
+			name,
+			age,
+			gender,
+			email
+		FROM
+		    employee
+
+		WHERE
+		    name LIKE concat('%',#{name},'%')
+	</select>
+
+
+	<!--
+	1、使用select标签定义调用存储过程
+	2、statementType="CALLABLE":表示要调用存储过程
+	3、{call procedure_name(params)}
+	-->
+	<select id="callProcedure" statementType="CALLABLE" resultMap="employeeMap">
+		{call p_sample (
+			#{start,mode=IN,jdbcType=INTEGER},
+			#{end,mode=IN,jdbcType=INTEGER},
+			#{count,mode=OUT,jdbcType=INTEGER}
+		)}
+	</select>
+</mapper>

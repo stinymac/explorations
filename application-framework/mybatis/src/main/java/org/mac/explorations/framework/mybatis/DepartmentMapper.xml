@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.mac.explorations.framework.mybatis.DepartmentMapper">
+
+	<select id="getDepartmentById" resultType="org.mac.explorations.framework.mybatis.Department">
+		SELECT
+		    id,
+		    name
+	    FROM
+	        department
+	    WHERE
+	        id = #{id}
+	</select>
+
+	<!--嵌套结果集的方式，使用collection标签定义关联的集合类型的属性封装规则  -->
+	<resultMap id="departmentMap" type="org.mac.explorations.framework.mybatis.Department">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<!--
+			collection定义关联集合类型的属性的封装规则
+			ofType:指定集合里面元素的类型
+		-->
+		<collection property="employees" ofType="org.mac.explorations.framework.mybatis.Employee">
+			<!-- 定义这个集合中元素的封装规则 -->
+			<id column="emp_id" property="id"/>
+			<result column="emp_name" property="name"/>
+			<result column="age" property="age"/>
+			<result column="gender" property="gender"/>
+			<result column="email" property="email"/>
+		</collection>
+	</resultMap>
+	<select id="getDepartmentAndItsEmpById" resultMap="departmentMap">
+		SELECT
+		    d.id id,
+			d.name name,
+			e.id emp_id,
+			e.name emp_name,
+			e.age age,
+			e.gender gender,
+			e.email email
+		FROM
+			department d
+			LEFT JOIN employee e ON e.dept_id = d.id
+		WHERE
+			d.id = #{id}
+	</select>
+
+	<!--collection：分步查询 -->
+	<resultMap id="departmentMapWithStep" type="org.mac.explorations.framework.mybatis.Department">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<!--
+		将多列的值封装map传递:
+		column="{key1=column1,key2=column2}"
+
+		fetchType="lazy"：表示使用延迟加载；
+
+		- lazy：延迟
+		- eager：立即
+		-->
+		<collection property="employees"
+					column="id"
+					fetchType="lazy"
+		            select="org.mac.explorations.framework.mybatis.EmployeeMapper.getEmployeeByDeptId"/>
+	</resultMap>
+	<select id="getDepartmentAndItsEmpByIdWithStep" resultMap="departmentMapWithStep">
+		SELECT
+		    id,
+		    name
+	    FROM
+	        department
+	    WHERE
+	        id = #{id}
+	</select>
+    
+</mapper>

@@ -1,0 +1,28 @@
+group 'org.mac'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    maven {
+        url 'http://repo.clojars.org/'
+    }
+    maven {
+        url 'http://uk.maven.org/maven2/'
+    }
+    mavenLocal()
+    //mavenCentral()
+}
+
+dependencies {
+    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.48'
+    compile group: 'hikari-cp', name: 'hikari-cp', version: '2.10.0'
+    compile group: 'org.springframework', name: 'spring-web', version: '5.2.2.RELEASE'
+    compile group: 'org.springframework', name: 'spring-aop', version: '5.2.2.RELEASE'
+    compile group: 'org.springframework', name: 'spring-core', version: '5.2.2.RELEASE'
+    compile group: 'org.springframework', name: 'spring-beans', version: '5.2.2.RELEASE'
+    compile group: 'org.springframework', name: 'spring-aspects', version: '5.2.2.RELEASE'
+    compile group: 'org.springframework', name: 'spring-context', version: '5.2.2.RELEASE'
+}

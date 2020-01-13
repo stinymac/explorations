@@ -12,4 +12,11 @@ include 'data-structures-and-algorithms:algorithms'
 
 /**application-framework*/
 include 'application-framework:netty'
+/**storage*/
+include 'storage:mysql'
+include 'storage:redis'
+include 'application-framework:mybatis'
+findProject(':application-framework:mybatis')?.name = 'mybatis'
+include 'application-framework:spring'
+findProject(':application-framework:spring')?.name = 'spring'
 
