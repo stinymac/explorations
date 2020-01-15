@@ -65,7 +65,7 @@ import java.util.Set;
  * FilterType.ASSIGNABLE_TYPE：按照给定的类型；
  * FilterType.ASPECTJ：使用ASPECTJ表达式
  * FilterType.REGEX：使用正则指定
- * FilterType.CUSTOM：使用自定义规则 (实现@see {@link org.springframework.core.type.filter.TypeFilter})
+ * FilterType.CUSTOM：使用自定义规则 (实现@see {@link TypeFilter})
  *
  */
 @ComponentScan(value = "org.mac.explorations.framework.spring.ioc.registration.component",
@@ -149,7 +149,7 @@ class SimpleCustomImportSelector implements ImportSelector {
 }
 
 /**
- * @see org.springframework.context.annotation.Condition
+ * @see Condition
  */
 class LocaleChinaCondition implements Condition {
 
