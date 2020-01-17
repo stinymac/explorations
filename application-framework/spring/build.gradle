@@ -8,12 +8,12 @@ sourceCompatibility = 1.8
 
 repositories {
     maven {
-        url 'http://uk.maven.org/maven2/'
+        url 'http://maven.aliyun.com/nexus/content/groups/public/'
     }
     maven {
         url 'http://repo.clojars.org/'
     }
-    flatDir {dirs 'libs'}
+    //flatDir {dirs 'libs'}
     mavenLocal()
     //mavenCentral()
 }
@@ -28,7 +28,8 @@ dependencies {
     compile group: 'org.springframework', name: 'spring-jdbc', version: '5.2.2.RELEASE'
     compile group: 'org.springframework', name: 'spring-core', version: '5.2.2.RELEASE'
     compile group: 'org.springframework', name: 'spring-beans', version: '5.2.2.RELEASE'
-    compile files('libs/spring-webmvc-5.2.2.RELEASE.jar')
+    compile group: 'org.springframework', name: 'spring-webmvc', version: '5.2.2.RELEASE'
+    //compile files('libs/spring-webmvc-5.2.2.RELEASE.jar')
     compile group: 'org.springframework', name: 'spring-aspects', version: '5.2.2.RELEASE'
     compile group: 'org.springframework', name: 'spring-context', version: '5.2.2.RELEASE'
 }
