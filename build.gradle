@@ -13,7 +13,11 @@ repositories {
     mavenCentral()
 }
 
-
+allprojects {
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+    }
+}
 
 dependencies {
     // 首次无法导入[Unable to resolve junit:junit:4.12],检查是否选择了[Offline work],若选择了将其取消.

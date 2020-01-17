@@ -12,7 +12,9 @@ repositories {
     mavenLocal()
     //mavenCentral()
 }
-
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
 sourceSets {
     main {
         resources {
