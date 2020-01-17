@@ -58,9 +58,85 @@ import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatche
  *
  * =====================================================================================================================
  *
- * ServletContainerInitializer驱动SpringMVC容器和Spring容器启动流程分析
+ * ServletContainerInitializer驱动Spring容器和SpringMVC容器启动流程分析
+ *
+ * SpringServletContainerInitializer 在Servlet容器启动时取得WebApplicationInitializer的
+ * 实现类,这里即是自定义的AnnotationDrivenWebApplicationInitializer 他的继承层次结构为:
+ *
+ * @see org.springframework.web.WebApplicationInitializer
+ *     @see org.springframework.web.context.AbstractContextLoaderInitializer
+ *         @see org.springframework.web.servlet.support.AbstractDispatcherServletInitializer
+ *             @see org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer
  *
  *
+ * Servlet容器启动时取得WebApplicationInitializer接口的实现类 处理后 调用onStartup(servletContext)方法
+ * 即调用@see {@link org.springframework.web.servlet.support.AbstractDispatcherServletInitializer#onStartup(javax.servlet.ServletContext) }
+ * <pre>
+ *     super.onStartup(servletContext);
+ *     registerDispatcherServlet(servletContext);
+ * </pre>
+ * @see {@link org.springframework.web.context.AbstractContextLoaderInitializer#onStartup(javax.servlet.ServletContext)}
+ * <pre>
+ *     registerContextLoaderListener(servletContext);
+ * </pre>
+ * @see {@link org.springframework.web.context.AbstractContextLoaderInitializer#registerContextLoaderListener(javax.servlet.ServletContext)}
+ * <pre>
+ *     // 首先创建Spring根容器
+ *     WebApplicationContext rootAppContext = createRootApplicationContext();
+ *     if (rootAppContext != null) {
+ *         // 注册Servlet上下文监听器 在Servlet容器启动的时候初始化Spring容器
+ *         // @see {@link org.springframework.web.context.ContextLoaderListener}
+ *         // @see {@link org.springframework.web.context.ContextLoader#initWebApplicationContext(javax.servlet.ServletContext)}
+ *         ContextLoaderListener listener = new ContextLoaderListener(rootAppContext);
+ *         listener.setContextInitializers(getRootApplicationContextInitializers());
+ *         servletContext.addListener(listener);
+ *     }
+ * </pre>
+ * @see org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer#createRootApplicationContext()
+ * <pre>
+ *     // 获取配置类 即这里的AnnotationDrivenWebApplicationInitializer#getRootConfigClasses
+ *     Class<?>[] configClasses = getRootConfigClasses();
+ *     if (!ObjectUtils.isEmpty(configClasses)) {
+ *         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+ *         context.register(configClasses);
+ *         return context;
+ *     }
+ * </pre>
+ * 根容器创建后 注册DispatcherServerlet
+ * @see org.springframework.web.servlet.support.AbstractDispatcherServletInitializer#registerDispatcherServlet(javax.servlet.ServletContext)
+ *
+ * 1.实现创建Servlet容器
+ *    @see org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer#createServletApplicationContext()
+ * 2.创建DispatcherServlet
+ *   @see org.springframework.web.servlet.support.AbstractDispatcherServletInitializer#createDispatcherServlet(org.springframework.web.context.WebApplicationContext)
+ * 3.注册ApplicationContextInitializer 这里没有
+ *   @see org.springframework.web.servlet.FrameworkServlet#setContextInitializers(org.springframework.context.ApplicationContextInitializer[])
+ * 4.将创建的DispatcherServlet注册到Servlet上下文
+ *   <pre>
+ *       ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, dispatcherServlet);
+ *   </pre>
+ * 5.设置和其他注册
+ *   <pre>
+ *       registration.setLoadOnStartup(1);
+ *       // 即这里提供的 AnnotationDrivenWebApplicationInitializer#getServletMappings()
+ *       registration.addMapping(getServletMappings());
+ *       registration.setAsyncSupported(isAsyncSupported());
+ *
+ *       Filter[] filters = getServletFilters();
+ *       if (!ObjectUtils.isEmpty(filters)) {
+ *           for (Filter filter : filters) {
+ *               registerServletFilter(servletContext, filter);
+ *           }
+ *       }
+ *       // 这里可以注册一些自定义的servlet组件
+ *       customizeRegistration(registration);
+ *   </pre>
+ *
+ * 综上 ServletContainerInitializer驱动Spring-Web应用启动的流程为:
+ * 1.获取根容器配置类 创建根容器 并注册Servlet上下文监听器
+ * 2.获取Servlet容器配置 创建Spring MVC容器
+ * 3.注册Spring MVC的DispatcherServlet到Servlet应用上下文 DispatcherServlet初始化时驱动Spring MVC容器初始化
+ * 4.Servlet容器启动时通过ServletContextListenner驱动Spring根容器首先启动 然后DispatcherServlet初始化时驱动Spring MVC容器启动
  *
  * @auther mac
  * @date 2020-01-16
@@ -73,7 +149,7 @@ public class AnnotationDrivenWebApplicationInitializer extends AbstractAnnotatio
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class[]{WebApplicationContextConfiguration.class};
+        return new Class[]{WebMVCApplicationContextConfiguration.class};
     }
 
     /**

@@ -31,7 +31,16 @@ Thumbs.db
 
 #gradle ignore
 build/
+libs/
 out/
 *.class
 
 /.idea/
+
+.github/
+
+.gradle/
+.git/
+
+/out/
+
