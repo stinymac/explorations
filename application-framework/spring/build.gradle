@@ -19,6 +19,7 @@ repositories {
 }
 
 dependencies {
+    providedCompile group: 'org.projectlombok', name: 'lombok', version: '1.18.10'
     compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
     compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.48'
     compile group: 'hikari-cp', name: 'hikari-cp', version: '2.10.0'
