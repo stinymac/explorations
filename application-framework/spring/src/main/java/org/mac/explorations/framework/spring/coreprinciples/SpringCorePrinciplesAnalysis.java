@@ -25,6 +25,7 @@ import org.mac.explorations.framework.spring.coreprinciples.component.SimpleCont
 import org.mac.explorations.framework.spring.coreprinciples.component.SimpleImportSelector;
 import org.mac.explorations.framework.spring.coreprinciples.component.SimpleLocaleChinaMatchingCondition;
 import org.mac.explorations.framework.spring.coreprinciples.component.service.SimpleSampleService;
+import org.springframework.beans.support.ResourceEditorRegistrar;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -34,6 +35,8 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.event.EventListenerMethodProcessor;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Service;
@@ -393,6 +396,7 @@ import javax.sql.DataSource;
  * 	   prepareRefresh();
  *
  * 	   // Tell the subclass to refresh the internal bean factory.
+ * 	   // 刷新bean factory (使用CAS保证安全刷新和设置序列化ID)
  * 	   ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
  *
  * 	   // Prepare the bean factory for use in this context.
@@ -424,6 +428,201 @@ import javax.sql.DataSource;
  *
  * 	   // Last step: publish corresponding event.
  * 	   finishRefresh();
+ * </pre>
+ *
+ * 1).prepareRefresh()
+ * @see org.springframework.context.support.AbstractApplicationContext#prepareRefresh()
+ * <pre>
+ *      // 初始化上下文环境中的Property Sources 由子类实现
+ *      initPropertySources();
+ *      // 验证Required Properties
+ * 		getEnvironment().validateRequiredProperties();
+ *
+ * 		if (this.earlyApplicationListeners == null) {
+ * 			this.earlyApplicationListeners = new LinkedHashSet<>(this.applicationListeners);
+ *      }
+ * 		else {
+ * 			this.applicationListeners.clear();
+ * 			this.applicationListeners.addAll(this.earlyApplicationListeners);
+ *      }
+ * 		this.earlyApplicationEvents = new LinkedHashSet<>();
+ * </pre>
+ * 2).prepareBeanFactory(beanFactory)
+ * @see org.springframework.context.support.AbstractApplicationContext#prepareBeanFactory(org.springframework.beans.factory.config.ConfigurableListableBeanFactory)
+ * <pre>
+ *     beanFactory.setBeanClassLoader(getClassLoader());
+ *
+ *    //@see {@link org.springframework.context.expression.StandardBeanExpressionResolver}
+ *     //@see {@link org.springframework.expression.spel.standard.SpelExpressionParser}
+ * 	   beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver(beanFactory.getBeanClassLoader()));
+ *
+ * 	   //@see {@link ResourceEditorRegistrar#registerCustomEditors(org.springframework.beans.PropertyEditorRegistry)}
+ * 	   beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
+ *
+ *     //@see {@link org.springframework.context.support.ApplicationContextAwareProcessor}
+ * 	   beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+ * 	   ......
+ * 	   添加需要忽略的内置依赖接口 如EnvironmentAware等
+ * 	   注册可解析的内置依赖接口 如BeanFactory等
+ * 	   ......
+ * 	   添加一个ApplicationListenerDetector的BeanPostProcessor用于检测内置的ApplicationListenner
+ * 	   @see org.springframework.context.support.ApplicationListenerDetector
+ *
+ * 	   如果需要添加一个用于加载时织如的BeanPostProcessor
+ * 	   @see org.springframework.context.weaving.LoadTimeWeaverAwareProcessor
+ * 	   @see org.springframework.context.weaving.LoadTimeWeaverAwareProcessor#postProcessBeforeInitialization(java.lang.Object, java.lang.String)
+ *
+ *     注册默认的环境Bean(StandardEnviroment ,SystemProperties, SystemEnvironment)
+ *     @see org.springframework.core.env.StandardEnvironment
+ *     @see org.springframework.core.env.AbstractEnvironment#getSystemProperties() // Map
+ *     @see org.springframework.core.env.AbstractEnvironment#getSystemEnvironment()// Map
+ *     @see org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#addSingleton(java.lang.String, java.lang.Object)
+ * </pre>
+ * 3).invokeBeanFactoryPostProcessors(beanFactory)
+ * @see org.springframework.context.support.AbstractApplicationContext#invokeBeanFactoryPostProcessors(org.springframework.beans.factory.config.ConfigurableListableBeanFactory)
+ * @see org.springframework.context.support.PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors(org.springframework.beans.factory.config.ConfigurableListableBeanFactory, java.util.List)
+ * <pre>
+ *     1.首先调用已经注册在BeanFactory中的所有BeanDefinitionRegistryPostProcessor的postProcessBeanDefinitionRegistry
+ *     2.调用完成后从BeanFactory中获取全部的BeanDefinitionRegistryPostProcessor从中筛选出全部实现了
+ *       PriorityOrdered节后的BeanDefinitionRegistryPostProcessor 后对其排序后初始化(getBean)，然后依次调用每个BeanDefinitionRegistryPostProcessor
+ *       的PostProcessor的postProcessBeanDefinitionRegistry
+ *    3.按2的方式再进行一遍 不同的是这次筛选实现了Ordered接口的
+ *    4.按2的方式又进行一遍 不同的是这次筛选全部的普通的BeanDefinitionRegistryPostProcessor
+ *    5.全部的BeanDefinitionRegistryPostProcessor(是BeanFactoryPostProcessor的子接口)调用postProcessBeanFactory方法
+ *    6.从BeanFactory中取全部的BeanFactoryPostProcessor后按PriorityOrdered 、Ordered和普通的分类后
+ *      排序并依次调用postProcessBeanFactory(BeanFactoryPostProcessor不用多次从BeanFactory中获取 因为这时不会再有机会通过
+ *      BeanDefinitionRegistryPostProcessor向容器中注册新的Bean定义了)
+ * </pre>
+ * 在invokeBeanFactoryPostProcessors这一步中全部的配置的Bean的定义信息被解析出注册到容器中
+ * 其处理器是在初始化容器的AnnotationBeanDefinitionReader的时候注册到容器中的ConfigurationClassPostProcessor
+ * @see org.springframework.context.annotation.ConfigurationClassPostProcessor
+ * 它是一个BeanDefinitionRegistryPostProcessor实现
+ * @see org.springframework.context.annotation.ConfigurationClassPostProcessor#postProcessBeanDefinitionRegistry(org.springframework.beans.factory.support.BeanDefinitionRegistry)
+ * @see org.springframework.context.annotation.ConfigurationClassPostProcessor#processConfigBeanDefinitions(org.springframework.beans.factory.support.BeanDefinitionRegistry)
+ * <pre>
+ *     1.从此时BeanFactory中的BeanDefinitions中筛选出配置类
+ *     @see org.springframework.context.annotation.ConfigurationClassUtils#checkConfigurationClassCandidate(org.springframework.beans.factory.config.BeanDefinition, org.springframework.core.type.classreading.MetadataReaderFactory)
+ *     2.对配置类排序
+ *     3.创建配置解析器
+ *     ConfigurationClassParser parser = new ConfigurationClassParser(
+ * 				this.metadataReaderFactory, this.problemReporter, this.environment,
+ * 				this.resourceLoader, this.componentScanBeanNameGenerator, registry);
+ *     @see org.springframework.context.annotation.ConfigurationClassParser
+ *     解析配置类
+ *     @see org.springframework.context.annotation.ConfigurationClassParser#parse(java.util.Set)
+ *     @see org.springframework.context.annotation.ConfigurationClassParser#processConfigurationClass(org.springframework.context.annotation.ConfigurationClass)
+ *     @see org.springframework.context.annotation.ConfigurationClassParser#doProcessConfigurationClass(org.springframework.context.annotation.ConfigurationClass, org.springframework.context.annotation.ConfigurationClassParser.SourceClass)
+ *         <pre>
+ *             @see org.springframework.context.annotation.ConfigurationClassParser#processMemberClasses(org.springframework.context.annotation.ConfigurationClass, org.springframework.context.annotation.ConfigurationClassParser.SourceClass)
+ *             //@PropertySource注解处理
+ *             @see org.springframework.context.annotation.ConfigurationClassParser#processPropertySource(org.springframework.core.annotation.AnnotationAttributes)
+ *             // 处理@ComponentScan注解
+ *             @see org.springframework.context.annotation.ComponentScanAnnotationParser#parse(org.springframework.core.annotation.AnnotationAttributes, java.lang.String)
+ *             @see org.springframework.context.annotation.ClassPathBeanDefinitionScanner#doScan(java.lang.String...)
+ *             检查扫面出的类中是否有需要配置类 有则需要时进行递归解析(如这里的JdbcProperties LoggingAspect等)
+ *             // 处理@Import注解
+ *             @see org.springframework.context.annotation.ConfigurationClassParser#processImports(org.springframework.context.annotation.ConfigurationClass, org.springframework.context.annotation.ConfigurationClassParser.SourceClass, java.util.Collection, boolean)
+ *             // 处理@ImportResource注解
+ *             // 处理@Bean
+ *
+ *         </pre>
+ *     @see org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader#loadBeanDefinitions(java.util.Set)
+ *     4.配置类处理器的postProcessBeanFactory方法执行
+ *     @see org.springframework.context.annotation.ConfigurationClassPostProcessor#postProcessBeanFactory(org.springframework.beans.factory.config.ConfigurableListableBeanFactory)
+ *     <pre>
+ *         // 配置类增强
+ *         // @see {@link org.springframework.context.annotation.ConfigurationClassPostProcessor#enhanceConfigurationClasses(org.springframework.beans.factory.config.ConfigurableListableBeanFactory)}
+ *         enhanceConfigurationClasses(beanFactory);
+ *         // @see {@link org.springframework.context.annotation.ConfigurationClassPostProcessor.ImportAwareBeanPostProcessor}
+ * 		   beanFactory.addBeanPostProcessor(new ImportAwareBeanPostProcessor(beanFactory));
+ *     </pre>
+ *     @see EventListenerMethodProcessor#postProcessBeanFactory(org.springframework.beans.factory.config.ConfigurableListableBeanFactory)
+ *
+ *     *向容器中注册
+ *     @see org.springframework.transaction.event.TransactionalEventListenerFactory
+ * </pre>
+ *
+ * 4).registerBeanPostProcessors(beanFactory)
+ * @see org.springframework.context.support.PostProcessorRegistrationDelegate#registerBeanPostProcessors(org.springframework.beans.factory.config.ConfigurableListableBeanFactory, org.springframework.context.support.AbstractApplicationContext)
+ * <pr>
+ *     1.先添加一个BeanPostProcessorChecker
+ *     @see org.springframework.context.support.PostProcessorRegistrationDelegate.BeanPostProcessorChecker#postProcessAfterInitialization(java.lang.Object, java.lang.String)
+ *     2.BeanPostProcessor分类
+ *     priorityOrderedPostProcessors
+ *         1 = {CommonAnnotationBeanPostProcessor}
+ *         0 = {AutowiredAnnotationBeanPostProcessor}
+ *    internalPostProcessors
+ *        0 = {AutowiredAnnotationBeanPostProcessor}
+ *        1 = {CommonAnnotationBeanPostProcessor}
+ *    orderedPostProcessorNames
+ *       0 = "org.springframework.aop.config.internalAutoProxyCreator"
+ *    priorityOrderedPostProcessors排序并注册
+ *    @see org.springframework.beans.factory.support.AbstractBeanFactory#addBeanPostProcessor(org.springframework.beans.factory.config.BeanPostProcessor)
+ *    orderedPostProcessor实例化初始化(getBean),然后排序并注册
+ *    ---------------------------------------------------
+ *    在代理创建器AnnotationAwareAspectJAutoProxyCreator注册后
+ *    其他的BeanPostProcessor调用getBean实例化的时候
+ *    @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#createBean(java.lang.String, org.springframework.beans.factory.support.RootBeanDefinition, java.lang.Object[])
+ *    <pre>
+ *        // Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
+ * 		  Object bean = resolveBeforeInstantiation(beanName, mbdToUse);
+ *    </pre>
+ *    尝试创建代理
+ *    @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#postProcessBeforeInstantiation(java.lang.Class, java.lang.String)
+ *    @see org.springframework.aop.aspectj.autoproxy.AspectJAwareAdvisorAutoProxyCreator#shouldSkip(java.lang.Class, java.lang.String)
+ *    @see org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator#findCandidateAdvisors()
+ *    @see org.springframework.aop.framework.autoproxy.BeanFactoryAdvisorRetrievalHelper#findAdvisorBeans()
+ *    会开始初始化AOP代理相关的组件
+ *    @see org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration
+ *    @see org.springframework.transaction.annotation.AnnotationTransactionAttributeSource
+ *    @see org.springframework.transaction.interceptor.TransactionInterceptor
+ *    @see org.springframework.transaction.interceptor.BeanFactoryTransactionAttributeSourceAdvisor
+ *    ---------------------------------------------------
+ *    普通的PostProcessor实例化初始化(getBean),然后排序并注册
+ *    internalPostProcessors排序并注册
+ *    最后向容器中添加一个 ApplicationListenerDetector
+ *    @see org.springframework.context.support.ApplicationListenerDetector
+ * </pr>
+ * 5).initMessageSource()
+ * @see org.springframework.context.support.AbstractApplicationContext#initMessageSource()
+ * 有指定的MessageSource初始化指定MessageSource
+ * 没有则默认注册@see {@link org.springframework.context.support.DelegatingMessageSource}到容器
+ * 6).initApplicationEventMulticaster()
+ * @see org.springframework.context.support.AbstractApplicationContext#initApplicationEventMulticaster()
+ * 有指定的ApplicationEventMulticaster初始化指定
+ * 没有则默认注册@see {@link org.springframework.context.event.SimpleApplicationEventMulticaster}到容器
+ * 7).onRefresh()
+ * // For subclasses: do nothing by default.
+ * @see org.springframework.context.support.AbstractApplicationContext#onRefresh()
+ * 8).registerListeners()
+ * @see org.springframework.context.support.AbstractApplicationContext#registerListeners()
+ * 将已注册的ApplicationContextListeners注册到ApplicationEventMulticaster
+ * 并发布早期事件
+ * 9).finishBeanFactoryInitialization(beanFactory)
+ * 初始换剩下的非懒加载的单例Bean
+ * @see org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization(org.springframework.beans.factory.config.ConfigurableListableBeanFactory)
+ * 10).finishRefresh()
+ * @see org.springframework.context.support.AbstractApplicationContext#finishRefresh()
+ * <pre>
+ *      // Clear context-level resource caches (such as ASM metadata from scanning).
+ * 		clearResourceCaches();
+ *
+ * 		// Initialize lifecycle processor for this context.
+ * 		initLifecycleProcessor();
+ *
+ * 		// Propagate refresh to lifecycle processor first.
+ *   	@see org.springframework.context.support.DefaultLifecycleProcessor
+ *      @see org.springframework.context.support.DefaultLifecycleProcessor#onRefresh()
+ * 		getLifecycleProcessor().onRefresh();
+ *
+ * 		// Publish the final event.
+ * 	    @see org.springframework.context.support.AbstractApplicationContext#publishEvent(java.lang.Object, org.springframework.core.ResolvableType)
+ * 	    @see org.springframework.context.event.SimpleApplicationEventMulticaster#multicastEvent(org.springframework.context.ApplicationEvent, org.springframework.core.ResolvableType)
+ * 		publishEvent(new ContextRefreshedEvent(this));
+ *
+ * 		// Participate in LiveBeansView MBean, if active.
+ * 	    @see org.springframework.context.support.LiveBeansView#registerApplicationContext(org.springframework.context.ConfigurableApplicationContext)
+ * 		LiveBeansView.registerApplicationContext(this);
  * </pre>
  *
  * @auther mac
