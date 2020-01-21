@@ -23,7 +23,7 @@ import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringValueResolver;
 
-import javax.annotation.Resource;
+//import javax.annotation.Resource;
 
 /**
  * @auther mac
@@ -32,9 +32,9 @@ import javax.annotation.Resource;
 @Service
 public class PersonService implements ApplicationContextAware,BeanNameAware,EmbeddedValueResolverAware {
 
-    //@Autowired
+    @Autowired
     //@Resource(name = "otherPersonRepository")
-    @Resource
+    //@Resource
     //@Inject
     private PersonRepository personRepository;
 

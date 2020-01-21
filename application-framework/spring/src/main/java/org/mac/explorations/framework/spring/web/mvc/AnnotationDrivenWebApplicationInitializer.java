@@ -14,7 +14,10 @@
 
 package org.mac.explorations.framework.spring.web.mvc;
 
+import org.springframework.web.filter.HiddenHttpMethodFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
+
+import javax.servlet.Filter;
 
 /**
  * 注解驱动的spring-webmvc的使用
@@ -58,7 +61,7 @@ import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatche
  *
  * =====================================================================================================================
  *
- * ServletContainerInitializer驱动Spring容器和SpringMVC容器启动流程分析
+ * ServletContainerInitializer初始化Spring容器和SpringMVC容器流程分析
  *
  * SpringServletContainerInitializer 在Servlet容器启动时取得WebApplicationInitializer的
  * 实现类,这里即是自定义的AnnotationDrivenWebApplicationInitializer 他的继承层次结构为:
@@ -161,5 +164,16 @@ public class AnnotationDrivenWebApplicationInitializer extends AbstractAnnotatio
     @Override
     protected String[] getServletMappings() {
         return new String[]{"/"};
+    }
+
+    /**
+     * 用于支持REST风格的请求
+     * @see org.springframework.web.filter.HiddenHttpMethodFilter
+     *
+     * @return
+     */
+    @Override
+    protected Filter[] getServletFilters() {
+        return new Filter[]{new HiddenHttpMethodFilter()};
     }
 }
