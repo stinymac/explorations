@@ -19,7 +19,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 
 /**
  * @auther mac
- * @date: 2020-01-17 22:47
+ * @date 2020-01-17 22:47
  */
 public class SimpleContextRefreshedEventApplicationListener implements ApplicationListener<ContextRefreshedEvent> {
     @Override

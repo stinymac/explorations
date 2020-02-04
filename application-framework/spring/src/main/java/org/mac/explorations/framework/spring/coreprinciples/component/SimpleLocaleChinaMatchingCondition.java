@@ -22,7 +22,7 @@ import java.util.Locale;
 
 /**
  * @auther mac
- * @date: 2020-01-17 22:01
+ * @date 2020-01-17 22:01
  */
 public class SimpleLocaleChinaMatchingCondition implements Condition {
     @Override

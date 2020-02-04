@@ -19,7 +19,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 
 /**
  * @auther mac
- * @date: 2020-01-17 22:31
+ * @date 2020-01-17 22:31
  */
 public class ChineseRabbitBeanPostProcessor implements BeanPostProcessor {
     @Override

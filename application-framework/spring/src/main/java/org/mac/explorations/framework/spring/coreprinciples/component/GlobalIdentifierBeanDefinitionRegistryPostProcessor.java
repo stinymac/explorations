@@ -22,7 +22,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 
 /**
  * @auther mac
- * @date: 2020-01-17 22:39
+ * @date 2020-01-17 22:39
  */
 public class GlobalIdentifierBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
     @Override

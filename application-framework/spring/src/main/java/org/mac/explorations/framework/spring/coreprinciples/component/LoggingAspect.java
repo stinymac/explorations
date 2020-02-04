@@ -26,7 +26,7 @@ import java.util.Arrays;
 
 /**
  * @auther mac
- * @date: 2020-01-17 22:49
+ * @date 2020-01-17 22:49
  */
 @Aspect
 @Component

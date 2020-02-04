@@ -18,7 +18,7 @@ import java.time.LocalDate;
 
 /**
  * @auther mac
- * @date: 2020-01-17 21:09
+ * @date 2020-01-17 21:09
  */
 public class Brand {
     private String name;

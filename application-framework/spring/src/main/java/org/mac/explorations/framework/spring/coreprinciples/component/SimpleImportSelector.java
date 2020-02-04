@@ -19,7 +19,7 @@ import org.springframework.core.type.AnnotationMetadata;
 
 /**
  * @auther mac
- * @date: 2020-01-17 21:54
+ * @date 2020-01-17 21:54
  */
 public class SimpleImportSelector implements ImportSelector {
     @Override

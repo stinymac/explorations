@@ -16,7 +16,7 @@ package org.mac.explorations.framework.spring.coreprinciples.component;
 
 /**
  * @auther mac
- * @date: 2020-01-17 22:35
+ * @date 2020-01-17 22:35
  */
 public class GlobalIdentifierBean {
     private final String identifier = "CODE_SLAVE";

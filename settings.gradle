@@ -14,9 +14,8 @@ include 'data-structures-and-algorithms:algorithms'
 include 'application-framework:netty'
 include 'application-framework:mybatis'
 include 'application-framework:spring'
+include 'application-framework:spring-boot'
 
 /**storage*/
 include 'storage:mysql'
 include 'storage:redis'
-
-

@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @auther mac
- * @date: 2020-01-17 21:40
+ * @date 2020-01-17 21:40
  */
 @Service
 public class SimpleSampleService {

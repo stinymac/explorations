@@ -14,8 +14,8 @@
 
 package org.mac.explorations.framework.spring.ioc.lifecycle.bean;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+//import javax.annotation.PostConstruct;
+//import javax.annotation.PreDestroy;
 
 /**
  * @auther mac
@@ -27,12 +27,12 @@ public class Duck {
         System.err.println("=====Duck construction=====");
     }
 
-    @PostConstruct
+    //@PostConstruct
     public void init() {
         System.err.println("=====Duck init=====");
     }
 
-    @PreDestroy
+    // @PreDestroy
     public void destroy() {
         System.err.println("=====Duck destroy=====");
     }

@@ -20,7 +20,7 @@ import org.springframework.stereotype.Repository;
 
 /**
  * @auther mac
- * @date: 2020-01-17 21:37
+ * @date 2020-01-17 21:37
  */
 @Repository
 public class SimpleSampleRepository {

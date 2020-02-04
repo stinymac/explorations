@@ -20,7 +20,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
  * @auther mac
- * @date: 2020-01-17 22:42
+ * @date 2020-01-17 22:42
  */
 public class PrintBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
     @Override

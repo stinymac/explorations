@@ -18,7 +18,7 @@ import lombok.Data;
 
 /**
  * @auther mac
- * @date: 2020-01-17 22:06
+ * @date 2020-01-17 22:06
  */
 @Data
 public class ChineseRabbit {

@@ -21,7 +21,7 @@ import javax.validation.constraints.NotEmpty;
 
 /**
  * @auther mac
- * @date: 2020-01-21 17:35
+ * @date 2020-01-21 17:35
  */
 public class User {
     @NotEmpty

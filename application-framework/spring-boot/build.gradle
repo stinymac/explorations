@@ -1,0 +1,56 @@
+plugins {
+    id 'org.springframework.boot' version '2.2.4.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'java'
+}
+
+group 'org.mac'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    maven {
+        url 'http://maven.aliyun.com/nexus/content/groups/public/'
+    }
+    maven {
+        url 'http://repo.clojars.org/'
+    }
+    mavenLocal()
+}
+
+sourceSets {
+    main {
+        resources {
+            //可以将java目录下的所有非.java资源打包到classes下
+            srcDir 'src/main/java'
+        }
+    }
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.1'
+    compile group: 'com.alibaba', name: 'druid-spring-boot-starter', version: '1.1.21'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+    runtimeOnly 'mysql:mysql-connector-java'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-thymeleaf'
+    compile group: 'org.webjars', name: 'bootstrap', version: '4.4.1'
+    compile group: 'org.webjars', name: 'jquery', version: '3.4.1'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.10'
+    annotationProcessor 'org.projectlombok:lombok:1.18.10'
+    compile group: 'org.springframework.boot', name: 'spring-boot-autoconfigure-processor'
+    annotationProcessor 'org.springframework.boot:spring-boot-autoconfigure-processor'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    // compile ('org.springframework.boot:spring-boot-starter-web'){
+    //        exclude  group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+    // }
+    // compile group: 'org.springframework.boot', name: 'spring-boot-starter-undertow'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+}
+test {
+    useJUnitPlatform()
+}

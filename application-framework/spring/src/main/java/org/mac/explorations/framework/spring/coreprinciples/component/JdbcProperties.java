@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @auther mac
- * @date: 2020-01-17 22:20
+ * @date 2020-01-17 22:20
  */
 @Component
 @Data
